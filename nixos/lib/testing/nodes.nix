@@ -1,4 +1,4 @@
-testModuleArgs@{ config, lib, hostPkgs, nodes, ... }:
+testModuleArgs@{ config, lib, hostPkgs, pkgs, nodes, ... }:
 
 let
   inherit (lib)
@@ -27,6 +27,7 @@ let
           ({ config, ... }:
             {
               virtualisation.qemu.package = testModuleArgs.config.qemu.package;
+              virtualisation.host.pkgs = lib.mkDefault hostPkgs;
             })
           (optionalAttrs (!config.node.pkgsReadOnly) {
             key = "nodes.nix-pkgs";
@@ -35,7 +36,9 @@ let
               # when the test framework is used by Nixpkgs NixOS tests.
               nixpkgs.config.allowAliases = false;
               # TODO: switch to nixpkgs.hostPlatform and make sure containers-imperative test still evaluates.
-              nixpkgs.system = hostPkgs.stdenv.hostPlatform.system;
+              nixpkgs = {
+                inherit (pkgs.stdenv) hostPlatform buildPlatform;
+              };
             };
           })
           testModuleArgs.config.extraBaseModules

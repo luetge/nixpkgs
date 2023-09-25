@@ -1,6 +1,7 @@
 args@
 { system
 , pkgs ? import ../.. { inherit system config; }
+, hostPkgs ? pkgs
   # Use a minimal kernel?
 , minimal ? false
   # Ignored
@@ -30,7 +31,8 @@ rec {
 
   extraTestModule = {
     config = {
-      hostPkgs = pkgs;
+      _module.args.pkgs = pkgs;
+      inherit hostPkgs;
     };
   };
 
